@@ -1,0 +1,124 @@
+1.django-admin startproject [name]
+2.python manage.py startapp webapp
+3. INSTALLED_APPS = [
+    'webapp',
+4.
+from django.conf.urls import url,include
+from django.contrib import admin
+
+urlpatterns = [
+    url(r'^admin/', admin.site.urls),
+#OR url(r'^$', include('webapp.urls')),
+    url(r'^webapp/', include('webapp.urls')),
+]
+5.in webapp\urls.py
+from django.conf.urls import url
+from . import views
+
+urlpatterns = [
+    url(r'^$', views.index, name='index'),
+]
+6.webapp\views.py
+'''
+from django.shortcuts import render
+from django.http import HttpResponse
+
+def index(request):
+    return HttpResponse("<h2>HEY!</h2>")
+'''
+
+************************************************************************************************************_--MODEL (DB)--_**********************************
+1.CMD - python manage.py startapp blog - do a folder
+2.settings.py - INSTALLED_APPS =[ 'blog',..]
+3.mysite/urls.py - url(r'^blog/', include('blog.urls')),
+
+4.mysite/blog/models.py -
+'''
+from django.db import models
+
+
+class
+
+Post(models.Model):
+
+    title = models.CharField(max_length=140)
+
+    body = models.TextField()
+
+    date = models.DateField()
+
+
+
+    def __str__(self):
+
+        return self.title
+
+'''
+
+5.mysite/blog/urls.py
+'''
+from django.conf.urls import url, include
+from django.views.generic import ListView, DetailView
+from blog.models import Post
+
+urlpatterns = [ url(r'^$', ListView.as_view(queryset=Post.objects.al().order_by('-date')[:2],template_name='blog/blog.html'))]
+
+6.creating mysite/blog/ -> /templates/blog/blog.html
+'''
+{% extends 'personal/header.html' %}  # shablon
+
+{% block content %}
+    {% for post in object_list %}
+        <h5>{{ post.date|date:'Y-m-d' }}
+        <a href='/blog/{{post.id}}'> {{post.title}}</a></h5>
+    {% endfor %}
+{% endblock %}
+'''
+
+7.Migrations.
+CMD - python manage.py migrate - no migration to apply yet !
+7.1. python manage.py makemigrations - create 0001_initial.py
+OR
+python manage.py makemigrations blog
+7.2. python manage.py sqlmigrate blog 0001 - CREATE TABLE 'blog_post'(...)
+7.3.python manage.py migrate - Applying migrate
+
+( python manage.py makemigrations article
+python manage.py migratе article﻿ )
+
+CREATING AN ADMIN
+8. python manage.py createsuperuser
+login - admin
+email - pavlo.olshansky@gmail.com
+pass - 123zxcmysite
+
+9.mysite/blog/admin.py
+'''
+from django.contrib import admin
+
+from blog.models import Post
+
+
+
+admin.site.register(Post)
+
+'''
+
+******************
+10. add urls to mysite\blog\urls.py
+urlpatterns = [ url(r'^$', ListView.as_view(queryset=Post.objects.all().order_by('-date')[:10],
+template_name='blog/blog.html')),
+
+url(r'^(?P<pk>\d+)$', DetailView.as_view(model=Post, template_name='blog/post.html')))] - ?P - pick group; <pk> - primary key
+
+11. Creating mysite\blog\templates\blog\post.html
+'''
+{% extends 'personal/header.html' %}
+
+{% block content %}
+    <h3>{{post.title}}</h3>
+    <h6>on {{post.date}}</h6>
+    {{post.body|safe|linebreaks}} #-safe-you can write<h1>Giant text</h1> in post
+
+{% endblock %}
+'''
